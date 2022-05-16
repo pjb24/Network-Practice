@@ -19,19 +19,12 @@ int main()
 			{
 				std::cout << "Successfully connected to server!" << std::endl;
 				
-				std::string buffer = "Hello world from client!";
-				
+				Packet packet;
+				packet << std::string( "This is the first string!" );
+				packet << std::string( "This is the second string!" );
 				while ( true )
 				{
-					uint32_t bufferSize = buffer.size();
-					bufferSize = htonl( bufferSize );
-					int result = socket.SendAll( &bufferSize, sizeof( uint32_t ) );
-					if ( result != PResult::P_Success )
-					{
-						break;
-					}
-
-					result = socket.SendAll( buffer.data(), buffer.size() );
+					PResult result = socket.Send( packet );
 					if ( result != PResult::P_Success )
 					{
 						break;

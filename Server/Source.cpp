@@ -23,33 +23,29 @@ int main()
 				if ( socket.Accept( newConnection ) == PResult::P_Success )
 				{
 					std::cout << "New connection accepted." << std::endl;
-					
-					std::string buffer = "";
+
+					std::string string1, string2;
+					Packet packet;
 					while ( true )
 					{
-						uint32_t bufferSize = 0;
-
-						int result = newConnection.RecvAll( &bufferSize, sizeof( uint32_t ) );
+						PResult result = newConnection.Recv( packet );
 						if ( result != PResult::P_Success )
 						{
 							break;
 						}
 
-						bufferSize = ntohl( bufferSize );
-
-						if ( bufferSize > PNet::g_MaxPacketSize )
+						try
 						{
+							packet >> string1 >> string2;
+
+						}
+						catch ( PacketException& exception )
+						{
+							std::cout << exception.what() << std::endl;
 							break;
 						}
-
-						buffer.resize( bufferSize );
-						result = newConnection.RecvAll( &buffer[0], bufferSize );
-						if ( result != PResult::P_Success )
-						{
-							break;
-						}
-
-						std::cout << "[" << bufferSize << "] - " << buffer << std::endl;
+						std::cout << string1 << std::endl;
+						std::cout << string2 << std::endl;
 					}
 
 					newConnection.Close();
