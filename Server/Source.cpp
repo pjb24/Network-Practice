@@ -24,11 +24,10 @@ int main()
 				{
 					std::cout << "New connection accepted." << std::endl;
 					char buffer[256];
-					int bytesReceived = 0;
 					int result = PResult::P_Success;
 					while ( result == PResult::P_Success )
 					{
-						result = newConnection.Recv( buffer, 256, bytesReceived );
+						result = newConnection.RecvAll( buffer, 256 );
 						if ( result != PResult::P_Success )
 						{
 							break;
