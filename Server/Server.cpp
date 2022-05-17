@@ -60,9 +60,13 @@ void Server::Frame()
 				std::cout << acceptedConnection.ToString() << " - New connection accepted." << std::endl;
 				WSAPOLLFD newConnectionFD = {};
 				newConnectionFD.fd = newConnectionSocket.GetHandle();
-				newConnectionFD.events = POLLRDNORM;
+				newConnectionFD.events = POLLRDNORM | POLLWRNORM;
 				newConnectionFD.revents = 0;
 				master_fd.push_back( newConnectionFD );
+
+				std::shared_ptr<Packet> welcomeMessagePacket = std::make_shared<Packet>( PacketType::PT_ChatMessage );
+				*welcomeMessagePacket << std::string( "Welcome!" );
+				acceptedConnection.pm_outgoing.Append( welcomeMessagePacket );
 			}
 			else
 			{
@@ -157,20 +161,68 @@ void Server::Frame()
 					}
 				}
 			}
-		}
 
-		for ( int i = connections.size() -1; i >= 0; i-- )
-		{
-			while ( connections[i].pm_incoming.HasPendingPackets() )
+			if ( use_fd[i].revents & POLLWRNORM )	//If normal data can be written without blocking
 			{
-				std::shared_ptr<Packet> frontPacket = connections[i].pm_incoming.Retrieve();
-				if ( !ProcessPacket( frontPacket ) )
+				PacketManager& pm = connection.pm_outgoing;
+				while ( pm.HasPendingPackets() )
 				{
-					CloseConnection( i, "Failed to process incoming packet." );
-					break;
+					if ( pm.currentTask == PacketManagerTask::ProcessPacketSize )	//Sending packet size
+					{
+						pm.currentPacketSize = pm.Retrieve()->buffer.size();
+						uint16_t bigEndianPacketSize = htons( pm.currentPacketSize );
+						int bytesSent = send( use_fd[i].fd, (char*)( &bigEndianPacketSize ) + pm.currentPacketExtractionOffset, sizeof( uint16_t ) - pm.currentPacketExtractionOffset, 0 );
+						if ( bytesSent > 0 )
+						{
+							pm.currentPacketExtractionOffset += bytesSent;
+						}
+
+						if ( pm.currentPacketExtractionOffset == sizeof( uint16_t ) )	//If full packet size was sent
+						{
+							pm.currentPacketExtractionOffset = 0;
+							pm.currentTask = PacketManagerTask::ProcessPacketContents;
+						}
+						else	//If full packet size was not sent, break out of the loop for sending outgoing packets for this connection - we'll have to try again next time we are able to write normal data without blocking
+						{
+							break;
+						}
+					}
+					else	//Sending packet contents
+					{
+						char* bufferPtr = &pm.Retrieve()->buffer[0];
+						int bytesSent = send( use_fd[i].fd, (char*)(bufferPtr)+pm.currentPacketExtractionOffset, pm.currentPacketSize - pm.currentPacketExtractionOffset, 0 );
+						if ( bytesSent > 0 )
+						{
+							pm.currentPacketExtractionOffset += bytesSent;
+						}
+
+						if ( pm.currentPacketExtractionOffset == pm.currentPacketSize )	//If full packet contents have been sent
+						{
+							pm.currentPacketExtractionOffset = 0;
+							pm.currentTask = PacketManagerTask::ProcessPacketSize;
+							pm.Pop();	//Remove packet from queue after finished processing
+						}
+						else
+						{
+							break;
+						}
+					}
 				}
-				connections[i].pm_incoming.Pop();
 			}
+		}
+	}
+
+	for ( int i = connections.size() - 1; i >= 0; i-- )
+	{
+		while ( connections[i].pm_incoming.HasPendingPackets() )
+		{
+			std::shared_ptr<Packet> frontPacket = connections[i].pm_incoming.Retrieve();
+			if ( !ProcessPacket( frontPacket ) )
+			{
+				CloseConnection( i, "Failed to process incoming packet." );
+				break;
+			}
+			connections[i].pm_incoming.Pop();
 		}
 	}
 }
