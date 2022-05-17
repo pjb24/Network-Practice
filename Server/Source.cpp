@@ -6,6 +6,20 @@
 
 using namespace PNet;
 
+//server with multiple connections
+// 1 thread for loop to accept connections
+// 1 thread for sending to each connection
+// 1 thread for receiving from each connection
+
+//1 connection
+//3 threads
+
+//2 connections
+//5 threads
+
+//100 connections
+//201 threads
+
 bool ProcessPacket( Packet& packet )
 {
 	switch ( packet.GetPacketType() )
