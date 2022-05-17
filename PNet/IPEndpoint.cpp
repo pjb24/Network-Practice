@@ -1,6 +1,7 @@
 #include "IPEndpoint.h"
 #include <assert.h>
 #include <iostream>
+#include "Helper.h"
 #ifndef _WIN32
 #include <string.h>
 #endif // !_WIN32
@@ -21,6 +22,8 @@ namespace PNet
 			{
 				ip_string = ip;
 				hostname = ip;
+				Helpers::trim( ip_string );
+				Helpers::trim( hostname );
 
 				ip_bytes.resize( sizeof( uint32_t ) );
 				memcpy( &ip_bytes[0], &addr.s_addr, sizeof( uint32_t ) );
@@ -44,6 +47,8 @@ namespace PNet
 			inet_ntop( AF_INET, &host_addr->sin_addr, &ip_string[0], 16 );
 
 			hostname = ip;
+			Helpers::trim( ip_string );
+			Helpers::trim( hostname );
 
 			uint32_t ip_long = host_addr->sin_addr.s_addr;
 			ip_bytes.resize( sizeof( uint32_t ) );
@@ -63,6 +68,8 @@ namespace PNet
 		{
 			ip_string = ip;
 			hostname = ip;
+			Helpers::trim( ip_string );
+			Helpers::trim( hostname );
 
 			ip_bytes.resize( 16 );
 			memcpy( &ip_bytes[0], &addr6, 16 );
@@ -84,6 +91,8 @@ namespace PNet
 			inet_ntop( AF_INET6, &host_addr->sin6_addr, &ip_string[0], 46 );
 
 			hostname = ip;
+			Helpers::trim( ip_string );
+			Helpers::trim( hostname );
 
 			ip_bytes.resize( 16 );
 			memcpy( &ip_bytes[0], &host_addr->sin6_addr, 16 );
@@ -120,6 +129,8 @@ namespace PNet
 			inet_ntop( AF_INET6, &addrv6->sin6_addr, &ip_string[0], 46 );
 			hostname = ip_string;
 		}
+		Helpers::trim( ip_string );
+		Helpers::trim( hostname );
 	}
 
 	IPVersion IPEndpoint::GetIPVersion()

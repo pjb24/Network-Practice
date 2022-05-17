@@ -17,6 +17,7 @@ namespace PNet
 	class IPEndpoint
 	{
 	public:
+		IPEndpoint() {};
 		IPEndpoint( const char* ip, unsigned short port );
 		IPEndpoint( sockaddr* addr );
 		IPVersion GetIPVersion();
