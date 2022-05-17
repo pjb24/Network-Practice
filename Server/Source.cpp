@@ -1,14 +1,12 @@
 //Server Code
 //Author: Jacob Preston 2019-04-04
 
-#include "Server.h"
+#include "MyServer.h"
 #include <iostream>
-
-using namespace PNet;
 
 int main()
 {
-	Server server;
+	MyServer server;
 	if ( server.Initialize( IPEndpoint( "::", 6112 ) ) )
 	{
 		while ( true )

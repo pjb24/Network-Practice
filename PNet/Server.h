@@ -1,5 +1,5 @@
 #pragma once
-#include <PNet/IncludeMe.h>
+#include "TCPConnection.h"
 
 using namespace PNet;
 
@@ -9,9 +9,11 @@ public:
 	bool Initialize( IPEndpoint ip );
 	void Frame();
 
-private:
+protected:
+	virtual void OnConnect( TCPConnection& newConnection );
+	virtual void OnDisconnect( TCPConnection& lostConnection, std::string reason );
 	void CloseConnection( int connectionIndex, std::string reason );
-	bool ProcessPacket( std::shared_ptr<Packet> packet );
+	virtual bool ProcessPacket( std::shared_ptr<Packet> packet );
 
 	Socket listeningSocket;
 	std::vector<TCPConnection> connections;
