@@ -43,11 +43,11 @@ int main()
 	{
 		std::cout << "Winsock api successfully initialized." << std::endl;
 
-		Socket socket;
+		Socket socket( IPVersion::IPv6 );
 		if ( socket.Create() == PResult::P_Success )
 		{
 			std::cout << "Socket successfully created." << std::endl;
-			if ( socket.Listen( IPEndpoint( "0.0.0.0", 4790 ) ) == PResult::P_Success )
+			if ( socket.Listen( IPEndpoint( "::", 4790 ) ) == PResult::P_Success )
 			{
 				std::cout << "Socket successfully listening on port 4790." << std::endl;
 				Socket newConnection;
