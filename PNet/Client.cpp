@@ -22,7 +22,7 @@ namespace PNet
 				{
 					connection = TCPConnection( socket, ip );
 					master_fd.fd = connection.socket.GetHandle();
-					master_fd.events = POLLRDNORM | POLLWRNORM;
+					master_fd.events = POLLRDNORM;
 					master_fd.revents = 0;
 					isConnected = true;
 					OnConnect();
@@ -51,6 +51,11 @@ namespace PNet
 
 	bool Client::Frame()
 	{
+		if ( connection.pm_outgoing.HasPendingPackets() )
+		{
+			master_fd.events = POLLRDNORM | POLLWRNORM;
+		}
+
 		use_fd = master_fd;
 
 		if ( WSAPoll( &use_fd, 1, 1 ) > 0 )
@@ -182,6 +187,10 @@ namespace PNet
 							break;
 						}
 					}
+				}
+				if ( !connection.pm_outgoing.HasPendingPackets() )
+				{
+					master_fd.events = POLLRDNORM;
 				}
 			}
 		}
