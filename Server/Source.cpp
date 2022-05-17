@@ -6,12 +6,17 @@
 
 int main()
 {
-	MyServer server;
-	if ( server.Initialize( IPEndpoint( "::", 6112 ) ) )
+	if ( Network::Initialize() )
 	{
-		while ( true )
+		std::cout << "Winsock api successfully initialized." << std::endl;
+
+		MyServer server;
+		if ( server.Initialize( IPEndpoint( "::", 6112 ) ) )
 		{
-			server.Frame();
+			while ( true )
+			{
+				server.Frame();
+			}
 		}
 	}
 	Network::Shutdown();
