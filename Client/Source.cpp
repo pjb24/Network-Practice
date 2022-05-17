@@ -3,6 +3,11 @@
 
 #include <PNet/IncludeMe.h>
 #include <iostream>
+#ifndef _WIN32
+#include <unistd.h>
+#define Sleep(duration) usleep(duration*1000)
+#endif // !_WIN32
+
 
 using namespace PNet;
 
@@ -18,7 +23,7 @@ int main()
 			if ( socket.Connect( IPEndpoint( "127.0.0.1", 4790 ) ) == PResult::P_Success )
 			{
 				std::cout << "Successfully connected to server!" << std::endl;
-				
+
 				Packet stringPacket( PacketType::PT_ChatMessage );
 				stringPacket << std::string( "This is my string packet!" );
 
@@ -34,7 +39,7 @@ int main()
 				while ( true )
 				{
 					PResult result;
-					
+
 					if ( rand() % 2 == 0 )
 					{
 						result = socket.Send( stringPacket );
@@ -43,7 +48,7 @@ int main()
 					{
 						result = socket.Send( integersPacket );
 					}
-					
+
 					if ( result != PResult::P_Success )
 					{
 						break;

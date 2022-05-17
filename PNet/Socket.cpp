@@ -1,6 +1,9 @@
 #include "Socket.h"
 #include <assert.h>
 #include <iostream>
+#ifndef _WIN32
+#include <unistd.h>
+#endif // !_WIN32
 
 namespace PNet
 {
@@ -113,7 +116,11 @@ namespace PNet
 		if ( ipversion == IPVersion::IPv4 )
 		{
 			sockaddr_in addr = {};
+#ifdef _WIN32
 			int len = sizeof( sockaddr_in );
+#else
+			socklen_t len = sizeof( sockaddr_in );
+#endif // _WIN32
 			SocketHandle acceptedConnectionHandle = accept( handle, (sockaddr*)( &addr ), &len );
 			if ( acceptedConnectionHandle == INVALID_SOCKET )
 			{
@@ -130,7 +137,11 @@ namespace PNet
 		else	//IPv6
 		{
 			sockaddr_in6 addr = {};
+#ifdef _WIN32
 			int len = sizeof( sockaddr_in6 );
+#else
+			socklen_t len = sizeof( sockaddr_in6 );
+#endif // _WIN32
 			SocketHandle acceptedConnectionHandle = accept( handle, (sockaddr*)( &addr ), &len );
 			if ( acceptedConnectionHandle == INVALID_SOCKET )
 			{
@@ -176,7 +187,7 @@ namespace PNet
 
 	PResult Socket::Send( const void* data, int numberOfBytes, int& bytesSent )
 	{
-		bytesSent = send( handle, (const char*)data, numberOfBytes, NULL );
+		bytesSent = send( handle, (const char*)data, numberOfBytes, 0 );
 		if ( bytesSent == SOCKET_ERROR )
 		{
 			int error = WSAGetLastError();
@@ -188,7 +199,7 @@ namespace PNet
 
 	PResult Socket::Recv( void* destination, int numberOfBytes, int& bytesReceived )
 	{
-		bytesReceived = recv( handle, (char*)destination, numberOfBytes, NULL );
+		bytesReceived = recv( handle, (char*)destination, numberOfBytes, 0 );
 		if ( bytesReceived == 0 )	//If connection was gracefully closed
 		{
 			return PResult::P_GenericError;
