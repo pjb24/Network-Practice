@@ -11,4 +11,6 @@ public:
 
 private:
 	Socket listeningSocket;
+	std::vector<TCPConnection> connections;
+	std::vector<WSAPOLLFD> master_fd;
 };
