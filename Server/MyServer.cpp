@@ -22,7 +22,7 @@ void MyServer::OnConnect( TCPConnection& newConnection )
 	}
 }
 
-void MyServer::OnDisConnect( TCPConnection& lostConnection, std::string reason )
+void MyServer::OnDisconnect( TCPConnection& lostConnection, std::string reason )
 {
 	std::cout << "[" << reason << "] Connection lost: " << lostConnection.ToString() << "." << std::endl;
 

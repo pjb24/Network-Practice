@@ -7,6 +7,6 @@ class MyServer : public Server
 {
 private:
 	void OnConnect( TCPConnection& newConnection );
-	void OnDisConnect( TCPConnection& lostConnection, std::string reason );
+	void OnDisconnect( TCPConnection& lostConnection, std::string reason );
 	bool ProcessPacket( std::shared_ptr<Packet> packet );
 };
